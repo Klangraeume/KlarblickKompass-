@@ -20,6 +20,14 @@ exports.handler = async function (event) {
   try {
     const clientBody = JSON.parse(event.body);
 
+    if (!Array.isArray(clientBody.messages) || typeof clientBody.system !== "string") {
+      return {
+        statusCode: 400,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Ungueltige Anfrage." }),
+      };
+    }
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {

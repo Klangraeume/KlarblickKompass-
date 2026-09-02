@@ -17,7 +17,9 @@
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<!-- Babel 7 bleibt bewusst fest versioniert. Neuere Hauptversionen erzeugen
+     fuer JSX ES-Modul-Imports, die in einem klassischen Script nicht laufen. -->
+<script src="https://unpkg.com/@babel/standalone@7.26.10/babel.min.js"></script>
 
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef } = React;
@@ -243,6 +245,12 @@ function KlarBlickKompass() {
         }),
       });
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error?.message || data?.error || `Serverfehler ${response.status}`);
+      }
+      if (!Array.isArray(data.content)) {
+        throw new Error("Die Antwort des Sprachmodells hat nicht das erwartete Format.");
+      }
       const rawText = data.content
         .filter((b) => b.type === "text")
         .map((b) => b.text)

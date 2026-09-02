@@ -1,8 +1,8 @@
 # KlarBlick-Kompass auf Netlify veröffentlichen
 
 ## Was in diesem Ordner steckt
-- `public/index.html` — das eigentliche Tool, läuft direkt im Browser (React und Babel werden von einem CDN geladen, kein Build-Schritt nötig)
-- `netlify/functions/kompass-chat.js` — die Backend-Funktion, die deinen Anthropic-API-Schlüssel sicher hält und die Anfragen durchreicht
+- `index.html` — das eigentliche Tool, läuft direkt im Browser (React und eine fest versionierte Babel-7-Datei werden von einem CDN geladen, kein Build-Schritt nötig)
+- `functions/kompass-chat.js` — die Backend-Funktion, die deinen Anthropic-API-Schlüssel sicher hält und die Anfragen durchreicht
 - `netlify.toml` — sagt Netlify, wo beides liegt
 
 ## Schritt 1: API-Schlüssel besorgen
@@ -10,7 +10,7 @@ Falls noch nicht vorhanden: einen Anthropic-API-Schlüssel unter console.anthrop
 
 ## Schritt 2: Bei Netlify hochladen
 1. Auf netlify.com einloggen oder Konto anlegen.
-2. Diesen ganzen Ordner (`netlify-deploy`) als ZIP packen.
+2. Den Inhalt dieses Ordners als ZIP packen. `index.html` und `netlify.toml` müssen direkt auf der obersten Ebene der ZIP-Datei liegen.
 3. Im Netlify-Dashboard auf "Add new site" → "Deploy manually" und die ZIP-Datei reinziehen.
 
 ## Schritt 3: API-Schlüssel bei Netlify hinterlegen
