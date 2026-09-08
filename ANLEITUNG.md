@@ -1,27 +1,57 @@
-# KlarBlick-Kompass auf Netlify veröffentlichen
+# KlarBlick-Kompass als begrenzte Begleitstrecke
 
-## Was in diesem Ordner steckt
-- `index.html` — das eigentliche Tool, läuft direkt im Browser (React und eine fest versionierte Babel-7-Datei werden von einem CDN geladen, kein Build-Schritt nötig)
-- `functions/kompass-chat.js` — die Backend-Funktion, die deinen Anthropic-API-Schlüssel sicher hält und die Anfragen durchreicht
-- `netlify.toml` — sagt Netlify, wo beides liegt
+## Was diese Version kann
 
-## Schritt 1: API-Schlüssel besorgen
-Falls noch nicht vorhanden: einen Anthropic-API-Schlüssel unter console.anthropic.com anlegen (eigenes Konto, getrennt von deinem Claude.ai-Zugang). Dort fällt Guthaben pay-as-you-go an, siehe Kostenschätzung im Chat.
+- ein persönlicher Zugangscode pro Käufer
+- 15 Gesprächsblöcke pro Code
+- erste vollständige KlarBlick-Landkarte
+- spätere Beobachtungs-Check-ins mit gespeicherten Ergänzungen
+- serverseitig gespeicherter Verlauf; der Browser kann den Zähler nicht verändern
+- festes KI-Kostenbudget pro Zugangscode
+- medizinische Warnhinweise und Übergang zum persönlichen KlarBlick-Gespräch
 
-## Schritt 2: Bei Netlify hochladen
-1. Auf netlify.com einloggen oder Konto anlegen.
-2. Den Inhalt dieses Ordners als ZIP packen. `index.html` und `netlify.toml` müssen direkt auf der obersten Ebene der ZIP-Datei liegen.
-3. Im Netlify-Dashboard auf "Add new site" → "Deploy manually" und die ZIP-Datei reinziehen.
+## Dateien bei GitHub
 
-## Schritt 3: API-Schlüssel bei Netlify hinterlegen
-1. Im Netlify-Dashboard: Site settings → Environment variables.
-2. Neue Variable anlegen: Name `ANTHROPIC_API_KEY`, Wert dein Schlüssel aus Schritt 1.
-3. Danach einmal "Trigger deploy" klicken, damit die Variable aktiv wird.
+Den Inhalt dieses Ordners in das mit Netlify verbundene Repository laden. Nicht nur die ZIP-Datei hochladen.
 
-## Schritt 4: Testen
-Die von Netlify vergebene URL öffnen (z.B. `zufallsname.netlify.app`) und den Kompass einmal komplett durchklicken, genau wie hier im Chat.
+## Erforderliche Netlify-Umgebungsvariablen
 
-## Was noch fehlt (nächste Ausbaustufe, nicht in diesem Paket)
-- Mehrere Sitzungen mit Zähler (15 Sitzungen), das braucht eine kleine Datenbank statt nur die Funktion
-- Echter PDF-Export der Landkarte
-- Eigene Domain statt der Netlify-Zufalls-URL (in den Netlify-Einstellungen unter Domain management nachrüstbar)
+Unter **Project configuration → Environment variables** eintragen:
+
+- `ANTHROPIC_API_KEY`: API-Schlüssel von Anthropic
+- `ACCESS_CODE_SECRET`: mindestens 32 zufällige Zeichen; danach nicht mehr ändern, sonst werden bestehende Codes unlesbar
+- `ADMIN_SECRET`: ein anderes, langes Passwort für die Code-Verwaltung
+
+Optional:
+
+- `KLARBLICK_BUDGET_MICRO_USD`: persönliches API-Budget in Micro-US-Dollar. Standard ist `2500000`, also 2,50 USD.
+- `KLARBLICK_MODEL`: Standard ist `claude-sonnet-4-6`.
+
+Wichtig: `ACCESS_CODE_SECRET` und `ADMIN_SECRET` dürfen niemals in GitHub-Dateien oder Kursunterlagen stehen.
+
+## Zugangscode anlegen
+
+Nach dem Deploy diese Seite öffnen:
+
+`https://DEINE-DOMAIN/code-verwaltung.html`
+
+Verwaltungsschlüssel eingeben, optional einen Namen zur internen Zuordnung ergänzen und den Code erstellen. Der Code wird nur einmal vollständig angezeigt. In Netlify wird ausschließlich ein nicht zurückrechenbarer Prüfwert gespeichert.
+
+## Wie gezählt wird
+
+Ein Klick auf **Gespräch beginnen** reserviert einen der 15 Gesprächsblöcke. Einzelne Nachrichten werden nicht als eigene Sitzung gezählt. Wird ein Gespräch bewusst abgebrochen, gilt der Block als genutzt. Das verhindert endlose offene Sitzungen und hält die Kalkulation nachvollziehbar.
+
+## Kostenschutz
+
+Vor jedem Anthropic-Aufruf reserviert der Server konservativ die voraussichtlichen Kosten. Nach der Antwort ersetzt er die Reservierung durch die tatsächlich von Anthropic gemeldeten Input- und Outputtokens. Ist das persönliche Budget erreicht, startet kein weiterer API-Aufruf.
+
+Zusätzlich in der Anthropic Console ein monatliches Workspace-Spend-Limit setzen. Das ist die zweite, kontoweite Sicherung für den Fall von Fehlkonfiguration oder ungewöhnlichem Traffic.
+
+## Test vor dem Verkauf
+
+1. Einen Testcode anlegen.
+2. Erste Landkarte vollständig durchspielen.
+3. Browser schließen und mit demselben Code zurückkehren.
+4. Mindestens zwei Check-ins testen.
+5. Unter Netlify **Usage & billing** sowie in der Anthropic Console die tatsächlichen Kosten prüfen.
+6. Erst danach das persönliche Budget oder den Modellnamen verändern.

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>KlarBlick Zugangscode anlegen</title>
+  <style>
+    body{margin:0;background:#f7f0e4;color:#1e3a45;font-family:Arial,sans-serif}.box{max-width:520px;margin:40px auto;padding:28px;background:#fff;border-radius:16px}h1{font-size:23px}label{display:block;margin:16px 0 6px;font-size:14px}input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #9aa;border-radius:8px;font-size:15px}button{width:100%;margin-top:20px;padding:13px;border:0;border-radius:22px;background:#2e6b4a;color:#fff;font-size:15px;font-weight:bold;cursor:pointer}.result{margin-top:20px;padding:16px;background:#f7f0e4;border-radius:10px;white-space:pre-wrap;line-height:1.5}.hint{font-size:13px;color:#5c5a82;line-height:1.5}
+  </style>
+</head>
+<body><main class="box">
+  <h1>Neuen KlarBlick-Zugang anlegen</h1>
+  <p class="hint">Diese Seite funktioniert nur mit deinem geheimen Verwaltungsschlüssel. Der Schlüssel wird nicht gespeichert.</p>
+  <label for="secret">Verwaltungsschlüssel</label><input id="secret" type="password" autocomplete="off">
+  <label for="label">Name oder Bestellung, nur für deine Zuordnung</label><input id="label" placeholder="z. B. Anna · Bestellung 1042">
+  <label for="code">Eigener Code, optional</label><input id="code" placeholder="leer lassen für Zufallscode">
+  <button id="create">Zugangscode erstellen</button>
+  <div id="result" class="result" hidden></div>
+</main>
+<script>
+document.getElementById('create').addEventListener('click', async () => {
+  const button=document.getElementById('create'), result=document.getElementById('result');
+  button.disabled=true; result.hidden=false; result.textContent='Code wird erstellt...';
+  try {
+    const response=await fetch('/.netlify/functions/admin-codes',{method:'POST',headers:{'Content-Type':'application/json','x-admin-secret':document.getElementById('secret').value},body:JSON.stringify({label:document.getElementById('label').value,code:document.getElementById('code').value||undefined})});
+    const data=await response.json(); if(!response.ok) throw new Error(data.error||'Fehler');
+    result.textContent=`Zugangscode: ${data.code}\n\n15 Gesprächsblöcke freigeschaltet.\nBitte diesen Code an den Käufer weitergeben.`;
+    document.getElementById('code').value=''; document.getElementById('label').value='';
+  } catch(error) { result.textContent=`Fehler: ${error.message}`; }
+  finally { button.disabled=false; }
+});
+</script></body></html>

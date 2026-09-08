@@ -17,9 +17,7 @@
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<!-- Babel 7 bleibt bewusst fest versioniert. Neuere Hauptversionen erzeugen
-     fuer JSX ES-Modul-Imports, die in einem klassischen Script nicht laufen. -->
-<script src="https://unpkg.com/@babel/standalone@7.26.10/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef } = React;
@@ -66,41 +64,6 @@ const PATHS = [
   { key: "belastung", label: "Meine Augen funktionieren, sind aber ständig belastet", desc: "Für Anstrengung, Trockenheit, Bildschirmbelastung" },
 ];
 
-const SYSTEM_PROMPT = `Du bist der KlarBlick-Kompass von Kathrin Landrock / KlangRäume. Du führst ein fokussiertes, geführtes Gespräch über die persönliche Sehgeschichte des Nutzers. Du bist kein Diagnosetool. Du stellst keine Diagnose, du wertest nicht aus, du gibst keine Übungen. Du machst sichtbar, was der Nutzer bisher nicht verbunden hat.
-
-TON: Fokussiert, zügig, sanft aber bestimmt führend. Du-Form. Kein Trösten, kein Beruhigen, keine Optimismus-Floskeln. [[HANDOFF]] ist ausschließlich für wirklich schwere, akute Inhalte reserviert, zum Beispiel Verlust, Trauma, eine Krise, tiefe Verzweiflung. Ein normaler Ursache-Wirkung-Zusammenhang wie "mehr Stress seit dem neuen Job" ist NICHT automatisch ein Handoff-Fall, das ist genau die Art Beobachtung, die dieses Tool machen soll. Keine generische Coaching-Sprache, kein künstlich Spirituelles. Verboten: eintauchen, entdecken, enthüllen, umarmen, Haltung (als innere Haltung), kaputt. Keine Gedankenstriche, keine Auslassungspunkte. Kurze Absätze, meist 2-4 Sätze pro Antwort, dann eine einzelne, klare Frage.
-
-GESPRÄCHSTIEFE BEGRENZEN: Du bist kein Coach und kein Therapeut. Stelle NIEMALS mehrschrittige Gefühlsfragen wie "Spürst du eher Erleichterung oder Widerstand?", "Wie fühlt sich das für dich an?" oder "Was wäre eine vollständige Erklärung?". Sobald sich ein Zusammenhang klar zeigt (meist nach 2-3 Rückfragen), benenne ihn EINMAL knapp als Beobachtung und höre dort auf, ihn zu vertiefen. Grabe nicht weiter in Gefühlen. Biete danach NIEMALS einen Impuls oder eine Übung an, das gibt es ausschließlich ganz am Ende, siehe ABLAUF unten. Schlage stattdessen GENAU EINEN konkreten nächsten Bereich vor, mit einem kurzen Warum, keine offene Liste aller verbleibenden Bereiche und keine Impuls-Option. Der Nutzer kann trotzdem jederzeit einen anderen Bereich wählen, das ist kein Widerspruch zu FREIE REIHENFOLGE unten. Falls der Nutzer trotzdem nach einem Impuls oder einer Übung fragt, erkläre freundlich und kurz, dass das am Ende kommt, wenn das Gesamtbild da ist, und mach direkt mit deinem empfohlenen nächsten Bereich weiter. Beispiel: "Ich halte fest: seit dem Jobwechsel mit mehr Verantwortung und mehr Aufgaben ist die Erschöpfung da, das könnte zusammenhängen. Schauen wir uns als Nächstes den Körper an, weil Erschöpfung sich oft auch dort zeigt?"
-
-ABLAUF: Du gehst mit dem Nutzer durch fünf Beobachtungsbereiche: Ursprung (Sehbiografie, Kindheit, erste Brille, familiäre Prägung), Körper (Haltung, Spannung, Struktur), Funktion (Blickmotorik, Fokus, neuronale Verarbeitung), Innerer Raum (Emotion, Stress, innerer Zustand), Umfeld (Alltag, Bildschirm, Licht, Lebensstil). Gib während dieser fünf Bereiche KEINEN Weg-Impuls und KEINE Zwischenauswertung, das würde den Gesprächsfluss unterbrechen. WEG kommt ausschließlich einmal ganz am Ende, als Teil der finalen Landkarte (Feld wegImpuls), wenn alle fünf Bereiche abgeschlossen sind: dort EINEN passenden Impuls aus vier Kategorien (Beruhigen & Entlasten / Bewegen & Aktivieren / Nähren & Entgiften / Klären & Loslassen), passend zu dem, was insgesamt über alle Bereiche sichtbar wurde.
-
-REGEL FÜR DEN HANDOFF: [[HANDOFF]] ist die Ausnahme, nicht die Regel, siehe GESPRÄCHSTIEFE BEGRENZEN oben. Wenn du ihn wirklich brauchst, weil etwas akut Schweres im Raum steht, beende deine Nachricht DIREKT danach. Stelle in derselben Nachricht KEINE neue Frage zum nächsten Bereich, das widerspricht sich selbst. Warte die Antwort des Nutzers ab, bevor du das Gespräch fortsetzt oder zum nächsten Bereich übergehst.
-
-FREIE REIHENFOLGE, KEIN WIDERSTAND: Es gibt KEINE vorgeschriebene Reihenfolge der fünf Bereiche. Der Nutzer kann jederzeit selbst wählen, in welchen Bereich er als Nächstes wechseln möchte, auch mitten im Gespräch, auch bevor ein Bereich fertig beleuchtet ist. Das ist erwünscht, nicht störend. Wenn der Nutzer den Bereich wechselt, beschwere dich NIEMALS über die fehlende Struktur, mahne NIEMALS eine bestimmte Reihenfolge an und verlange NIEMALS zuerst "echten Inhalt", bevor du weitermachst. Reagiere stattdessen sofort mit einer guten, konkreten Einstiegsfrage für den neu gewählten Bereich, bei Bedarf mit Bezug auf das, was bisher schon sichtbar wurde. Ein Bereichswechsel ohne vorherige Antwort ist kein Problem, sondern schlicht ein neuer Startpunkt.
-
-SACKGASSEN ERKENNEN: Wenn deine erste Frage in einem Bereich ins Leere läuft, weil die Grundannahme dahinter für diesen Nutzer nicht zutrifft (z.B. er trägt keine Brille, hatte keine der angenommenen Erfahrungen), bestehe NICHT darauf, in diesem Bereich weiterzubohren. Erkenne es kurz an ("gut zu wissen") und schlage von dir aus einen anderen, wahrscheinlich ergiebigeren Bereich vor, statt in der Sackgasse nachzufragen. Das gilt auch INNERHALB eines Bereichs: wenn der Nutzer auf eine Rückfrage antwortet, dass da nichts ist (z.B. "meine Eltern hatten eine Brille" auf die Frage nach der eigenen Kindheit), frage NICHT noch einmal nach, ob nicht doch etwas war ("hast du selbst nie gemerkt..."). Das wirkt wie Drängen auf ein Ergebnis, das nicht da ist. Nimm "nichts Auffälliges" als vollwertige, ausreichende Antwort und geh weiter.
-
-HINTERGRUNDWISSEN (nur für gezielte Fragen nutzen, NIE diagnostisch auswerten, NIE Punkte oder Prozentzahlen ausgeben):
-- Ursprung: Zeitpunkt erste Brille (falls vorhanden), Schwangerschaft/Geburtsumstände, frühkindliche Prägung, Rolle der Eltern, Pubertät als Wendepunkt. WICHTIG: Setze beim Einstieg NIE voraus, dass der Nutzer eine Brille trägt oder je getragen hat. Öffne breiter, z.B. "Wie ist deine Sehsituation heute, trägst du eine Brille oder Kontaktlinsen, oder bist du ohne?", und leite erst von der Antwort aus in die passende Richtung (Sehbiografie mit Brille, oder z.B. wann Beschwerden ohne Sehhilfe begannen).
-- Körper: Haltung, Nacken-/Schulterspannung, Kiefer, Wirbelsäule, Durchblutung.
-- Funktion: Blickmotorik, Fokuswechsel Nah/Fern, Augendominanz, Reizüberflutung, Abschalten bei Stress.
-- Innerer Raum: Kontrollneigung, Perfektionismus, unterdrückte Gefühle, Verhärtung bei Anspannung, emotionale Lebensereignisse als mögliche zeitliche Koinzidenz.
-- Umfeld: Bildschirmzeit, Lichtmangel, Brillen-/Linsengewohnheiten, Ernährung, Schlaf.
-
-REGEL FÜR BEOBACHTUNGEN: Was der Nutzer sagt, ist eine Beobachtung, nie ein Beweis für eine Ursache. Formuliere Zusammenhänge immer als Möglichkeit ("mir fällt auf, dass...", "das könnte damit zusammenhängen...") nie als Tatsache ("das liegt daran, dass..."). Erfinde KEINE eigenen Begriffe oder Deutungen für das, was der Nutzer beschreibt. Wenn der Nutzer "mehr Verantwortung, mehr Aufgaben" sagt, bleibe bei genau diesen Worten, mach daraus nicht von dir aus "Erwartungsdruck" oder ähnliche Interpretationswörter. Nutze in deiner Zusammenfassung so nah wie möglich die Formulierungen des Nutzers selbst.
-
-WICHTIG - UNSICHTBARE STEUER-TAGS: Wenn ein Bereich aus deiner Sicht ausreichend beleuchtet ist (meist nach 2-3 Rückfragen, sobald eine klare Beobachtung benannt wurde), hänge ganz ans Ende deiner Nachricht (nach der sichtbaren Frage) in einer eigenen Zeile [[AREA_DONE:key]] an, wobei key eines von ursprung, koerper, funktion, raum, umfeld ist. Der Nutzer sieht dieses Tag nicht.
-
-Wenn alle fünf Bereiche abgeschlossen sind, erstelle die finale KlarBlick-Landkarte. Schreibe dafür KEINEN Fließtext, sondern ausschließlich einen JSON-Block in dieser Form, eingeleitet von [[LANDKARTE]]:
-[[LANDKARTE]]
-{"situation":"...","wendepunkte":["...","..."],"einflussfelder":["...","..."],"blinderFleck":"...","wegImpuls":{"kategorie":"...","konkret":"..."},"fragen":["...","...","..."],"schlusssatz":"..."}
-
-Das Feld "fragen" enthält KEINE Reflexionsfragen zum Nachdenken, sondern drei konkrete Beobachtungsaufgaben für die nächsten Tage, jeweils als kurze, direkte Aufforderung formuliert, worauf der Nutzer achten kann. Beispiel: "Achte darauf, zu welcher Tageszeit deine Augen am meisten Pause brauchen" statt "Was würde passieren, wenn...".
-
-Halte jedes Feld knapp (1-3 Sätze), damit die Antwort kurz bleibt. Der Schlusssatz ist offen und benennend, kein Trost, z.B. in der Art: "Du hast jetzt gesehen, wo dein Blick bisher nicht hingeschaut hat. Was du in den nächsten Tagen bemerkst, gehört ab jetzt dazu."
-
-GESPRÄCHSSTART: Nach der Begrüßung fragst du zuerst kurz nach dem aktuellen Anlass, dann beginnst du mit dem ersten Bereich, meist Ursprung, es sei denn der Nutzer wählt aktiv einen anderen Bereich zuerst.`;
-
 function polarToXY(cx, cy, r, angleDeg) {
   const rad = (angleDeg * Math.PI) / 180;
   return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
@@ -110,11 +73,17 @@ function parseAssistantMessage(raw) {
   let text = raw;
   let areaDone = null;
   let landkarte = null;
+  let checkin = null;
   let handoff = false;
+  let medical = false;
 
   if (text.includes("[[HANDOFF]]")) {
     handoff = true;
     text = text.replace("[[HANDOFF]]", "").trim();
+  }
+  if (text.includes("[[MEDICAL]]")) {
+    medical = true;
+    text = text.replace("[[MEDICAL]]", "").trim();
   }
   const areaMatch = text.match(/\[\[AREA_DONE:(\w+)\]\]/);
   if (areaMatch) {
@@ -131,11 +100,24 @@ function parseAssistantMessage(raw) {
       landkarte = null;
     }
   }
-  return { text, areaDone, landkarte, handoff };
+  const checkinIdx = text.indexOf("[[CHECKIN_DONE]]");
+  if (checkinIdx !== -1) {
+    const jsonPart = text.slice(checkinIdx + "[[CHECKIN_DONE]]".length).trim();
+    text = text.slice(0, checkinIdx).trim();
+    try {
+      checkin = JSON.parse(jsonPart);
+    } catch (e) {
+      checkin = null;
+    }
+  }
+  return { text, areaDone, landkarte, checkin, handoff, medical };
 }
 
 function KlarBlickKompass() {
   const [screen, setScreen] = useState("cover");
+  const [accessCode, setAccessCode] = useState("");
+  const [accessError, setAccessError] = useState("");
+  const [sessionInfo, setSessionInfo] = useState(null);
   const [selectedPath, setSelectedPath] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -144,8 +126,10 @@ function KlarBlickKompass() {
   const [currentArea, setCurrentArea] = useState("ursprung");
   const [landkarte, setLandkarte] = useState(null);
   const [handoffFlag, setHandoffFlag] = useState(false);
+  const [medicalFlag, setMedicalFlag] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showTextFallback, setShowTextFallback] = useState(false);
+  const [latestAddition, setLatestAddition] = useState(null);
   const scrollRef = useRef(null);
 
   function landkarteAsText(lk) {
@@ -162,7 +146,7 @@ function KlarBlickKompass() {
       "Meine möglichen Einflussfelder",
       ...(lk.einflussfelder || []).map((w) => `- ${w}`),
       "",
-      "Mein blinder Fleck",
+      "Ein möglicher blinder Fleck",
       lk.blinderFleck,
       "",
       `Mein erster Schritt`,
@@ -231,31 +215,81 @@ function KlarBlickKompass() {
 
   const ORDER = ["ursprung", "koerper", "funktion", "raum", "umfeld"];
 
-  async function callClaude(history, doneSoFar) {
+  function applyServerState(data) {
+    setSessionInfo({
+      sessionsUsed: data.sessionsUsed,
+      sessionsRemaining: data.sessionsRemaining,
+      activeSession: data.activeSession,
+      mode: data.mode,
+      exhausted: data.exhausted,
+      additions: data.additions || [],
+    });
+    if (data.landkarte) setLandkarte(data.landkarte);
+  }
+
+  async function accessApi(action, extra = {}) {
+    const response = await fetch("/.netlify/functions/kompass-chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, code: accessCode, ...extra }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      const error = new Error(data.error || "Die Anfrage konnte gerade nicht verarbeitet werden.");
+      error.data = data;
+      throw error;
+    }
+    applyServerState(data);
+    return data;
+  }
+
+  function hydrateConversation(data) {
+    const clean = [];
+    const done = {};
+    (data.activeMessages || []).forEach((message) => {
+      if (message.role === "assistant") {
+        const parsed = parseAssistantMessage(message.content);
+        if (parsed.areaDone) done[parsed.areaDone] = true;
+        clean.push({ role: "assistant", content: parsed.text });
+      } else {
+        clean.push(message);
+      }
+    });
+    setVisited(done);
+    setMessages(clean);
+  }
+
+  async function checkAccess() {
+    if (!accessCode.trim() || loading) return;
+    setLoading(true);
+    setAccessError("");
+    try {
+      const data = await accessApi("status");
+      if (data.activeSession) {
+        hydrateConversation(data);
+        setScreen("chat");
+      } else if (data.mode === "checkin") {
+        setScreen("dashboard");
+      } else {
+        setScreen("intro");
+      }
+    } catch (error) {
+      setAccessError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function callClaude(message) {
     setLoading(true);
     try {
-      const response = await fetch("/.netlify/functions/kompass-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: history.map((m) => ({ role: m.role, content: m.content })),
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.error?.message || data?.error || `Serverfehler ${response.status}`);
-      }
-      if (!Array.isArray(data.content)) {
-        throw new Error("Die Antwort des Sprachmodells hat nicht das erwartete Format.");
-      }
+      const data = await accessApi("message", { message });
+      if (!Array.isArray(data.content)) throw new Error("Die Antwort konnte gerade nicht geladen werden.");
       const rawText = data.content
         .filter((b) => b.type === "text")
         .map((b) => b.text)
         .join("\n");
-      const { text, areaDone, landkarte: lk, handoff } = parseAssistantMessage(rawText);
+      const { text, areaDone, landkarte: lk, checkin, handoff, medical } = parseAssistantMessage(rawText);
       if (areaDone) {
         const updatedVisited = { ...(doneSoFar || visited), [areaDone]: true };
         setVisited(updatedVisited);
@@ -263,9 +297,14 @@ function KlarBlickKompass() {
         if (nextArea) setCurrentArea(nextArea);
       }
       if (handoff) setHandoffFlag(true);
+      if (medical) setMedicalFlag(true);
       if (lk) {
         setLandkarte(lk);
         setScreen("landkarte");
+      }
+      if (checkin) {
+        setLatestAddition(checkin);
+        setScreen("checkinComplete");
       }
       setMessages((prev) => [...prev, { role: "assistant", content: text }]);
     } catch (e) {
@@ -278,24 +317,62 @@ function KlarBlickKompass() {
     }
   }
 
-  function startPath(path) {
+  async function startPath(path) {
     setSelectedPath(path);
     setScreen("chat");
-    const starterUser = {
-      role: "user",
-      content: `Ich starte den KlarBlick-Kompass. Mein gewählter Einstiegsweg: "${path.label}". Bitte begrüße mich kurz, erkläre die Grenzen des Tools in ein bis zwei Sätzen, und frage dann nach meinem aktuellen Anlass.`,
-    };
-    const next = [starterUser];
-    setMessages(next);
-    callClaude(next);
+    setMessages([]);
+    setLoading(true);
+    try {
+      const data = await accessApi("start", { path: path.label });
+      const rawText = data.content.filter((b) => b.type === "text").map((b) => b.text).join("\n");
+      const parsed = parseAssistantMessage(rawText);
+      setMessages([{ role: "assistant", content: parsed.text }]);
+    } catch (error) {
+      setMessages([{ role: "assistant", content: error.message }]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function startCheckin() {
+    setScreen("chat");
+    setMessages([]);
+    setVisited({});
+    setCurrentArea("weg");
+    setLoading(true);
+    try {
+      const data = await accessApi("start");
+      const rawText = data.content.filter((b) => b.type === "text").map((b) => b.text).join("\n");
+      const parsed = parseAssistantMessage(rawText);
+      setMessages([{ role: "assistant", content: parsed.text }]);
+    } catch (error) {
+      setMessages([{ role: "assistant", content: error.message }]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function closeSession() {
+    if (loading || !window.confirm("Möchtest du dieses Gespräch wirklich beenden? Dieser Gesprächsblock gilt dann als genutzt.")) return;
+    setLoading(true);
+    try {
+      await accessApi("close");
+      setMessages([]);
+      setScreen(sessionInfo?.mode === "checkin" ? "dashboard" : "intro");
+    } catch (error) {
+      setMessages((prev) => [...prev, { role: "assistant", content: error.message }]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function sendMessage() {
     if (!input.trim() || loading) return;
-    const next = [...messages, { role: "user", content: input.trim() }];
+    const userText = input.trim();
+    const next = [...messages, { role: "user", content: userText }];
     setMessages(next);
     setInput("");
-    callClaude(next);
+    callClaude(userText);
   }
 
   function jumpToArea(areaKey) {
@@ -307,7 +384,7 @@ function KlarBlickKompass() {
       { role: "user", content: `Lass uns jetzt in den Bereich "${label}" wechseln.` },
     ];
     setMessages(next);
-    callClaude(next);
+    callClaude(`Lass uns jetzt in den Bereich "${label}" wechseln.`);
   }
 
   const visitedCount = Object.keys(visited).length;
@@ -356,9 +433,9 @@ function KlarBlickKompass() {
               </div>
             </div>
           </div>
-          {screen === "chat" && (
+          {sessionInfo && screen !== "access" && (
             <div style={{ fontSize: "12px", color: COLORS.subtitle }}>
-              {visitedCount} / 5 Bereiche
+              {sessionInfo.sessionsRemaining} von 15 Gesprächen übrig
             </div>
           )}
         </div>
@@ -386,7 +463,7 @@ function KlarBlickKompass() {
               Dein persönliches Orientierungsgespräch über die Geschichte deines Sehens
             </p>
             <button
-              onClick={() => setScreen("intro")}
+              onClick={() => setScreen("access")}
               style={{
                 background: COLORS.logoGreen,
                 color: "#fff",
@@ -402,6 +479,69 @@ function KlarBlickKompass() {
               Weiter
             </button>
           </div>
+        </div>
+      )}
+
+      {screen === "access" && (
+        <div style={{ padding: "34px 24px 38px", textAlign: "center" }}>
+          <h1 style={{ fontFamily: "'Libre Baskerville', serif", fontSize: "23px", margin: "0 0 8px" }}>
+            Dein persönlicher Zugang
+          </h1>
+          <p style={{ fontSize: "14px", color: COLORS.subtitle, lineHeight: 1.55, margin: "0 0 22px" }}>
+            Gib den Zugangscode aus deinem Kursbereich ein. Dein Stand wird sicher gespeichert,
+            damit du später zu Klara zurückkehren kannst.
+          </p>
+          <input
+            value={accessCode}
+            onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+            onKeyDown={(e) => e.key === "Enter" && checkAccess()}
+            placeholder="XXXX-XXXX-XXXX"
+            autoComplete="off"
+            style={{ width: "100%", border: `1px solid ${COLORS.text}44`, borderRadius: "10px", padding: "13px 15px", fontSize: "16px", textAlign: "center", letterSpacing: "1.5px", fontFamily: "'Raleway', sans-serif" }}
+          />
+          {accessError && <div style={{ color: COLORS.logoRed, fontSize: "13px", marginTop: "10px" }}>{accessError}</div>}
+          <button
+            onClick={checkAccess}
+            disabled={loading}
+            style={{ width: "100%", marginTop: "14px", background: COLORS.logoGreen, color: "#fff", border: "none", borderRadius: "22px", padding: "13px 20px", fontSize: "15px", fontWeight: 600, cursor: loading ? "default" : "pointer", opacity: loading ? 0.65 : 1 }}
+          >
+            {loading ? "Zugang wird geprüft..." : "Kompass öffnen"}
+          </button>
+        </div>
+      )}
+
+      {screen === "dashboard" && sessionInfo && (
+        <div style={{ padding: "28px 24px 34px" }}>
+          <h1 style={{ fontFamily: "'Libre Baskerville', serif", fontSize: "22px", textAlign: "center", margin: "0 0 8px" }}>
+            Willkommen zurück
+          </h1>
+          <p style={{ fontSize: "14px", color: COLORS.subtitle, textAlign: "center", lineHeight: 1.55, margin: "0 0 22px" }}>
+            Deine erste Landkarte ist gespeichert. In einem neuen Gespräch kannst du Klara erzählen,
+            was dir seitdem aufgefallen ist.
+          </p>
+          <div style={{ background: "#fff", borderRadius: "12px", padding: "16px", marginBottom: "16px", border: `1px solid ${COLORS.text}1A` }}>
+            <div style={{ fontFamily: "'Libre Baskerville', serif", fontSize: "16px", marginBottom: "5px" }}>
+              Deine Begleitstrecke
+            </div>
+            <div style={{ fontSize: "13px", color: COLORS.subtitle }}>
+              {sessionInfo.sessionsUsed} Gesprächsblöcke genutzt · {sessionInfo.sessionsRemaining} übrig
+            </div>
+            <div style={{ height: "7px", background: `${COLORS.text}16`, borderRadius: "8px", marginTop: "12px", overflow: "hidden" }}>
+              <div style={{ width: `${(sessionInfo.sessionsUsed / 15) * 100}%`, height: "100%", background: COLORS.logoGreen }} />
+            </div>
+          </div>
+          <button
+            onClick={startCheckin}
+            disabled={loading || sessionInfo.exhausted}
+            style={{ width: "100%", background: COLORS.logoGreen, color: "#fff", border: "none", borderRadius: "22px", padding: "13px 20px", fontSize: "15px", fontWeight: 600, cursor: "pointer", opacity: sessionInfo.exhausted ? 0.55 : 1 }}
+          >
+            {sessionInfo.exhausted ? "Begleitstrecke abgeschlossen" : "Neuen Check-in beginnen"}
+          </button>
+          {landkarte && (
+            <button onClick={() => setScreen("landkarte")} style={{ width: "100%", marginTop: "10px", background: "#fff", color: COLORS.logoGreen, border: `1px solid ${COLORS.logoGreen}`, borderRadius: "22px", padding: "12px 20px", fontSize: "14px", cursor: "pointer" }}>
+              Meine Landkarte ansehen
+            </button>
+          )}
         </div>
       )}
 
@@ -427,7 +567,7 @@ function KlarBlickKompass() {
             KlarBlick-Landkarte.
           </p>
           <p style={{ fontSize: "13px", color: COLORS.subtitle, margin: "0 0 22px" }}>
-            Für den ersten Überblick brauchen wir etwa 5 bis 10 Minuten.
+            Plane für deine erste KlarBlick-Landkarte etwa 20 Minuten ein. Wenn du dir Zeit zum Nachspüren nimmst, können es auch 30 Minuten werden. Es geht nicht darum, schnell durchzukommen, deine Antworten sind das Material, aus dem deine Landkarte entsteht.
           </p>
 
           <h2
@@ -500,7 +640,7 @@ function KlarBlickKompass() {
             >
               {AREAS.find((a) => a.key === currentArea)?.label}
             </div>
-            <div style={{ display: "flex", gap: "6px" }}>
+            {sessionInfo?.mode === "first" && <div style={{ display: "flex", gap: "6px" }}>
               {ORDER.map((key) => (
                 <div
                   key={key}
@@ -518,7 +658,7 @@ function KlarBlickKompass() {
                   }}
                 />
               ))}
-            </div>
+            </div>}
           </div>
 
           <div
@@ -559,7 +699,7 @@ function KlarBlickKompass() {
               ))}
             {loading && (
               <div style={{ fontSize: "13px", color: COLORS.subtitle, padding: "4px 0" }}>
-                Der Kompass denkt nach...
+                Klara denkt nach...
               </div>
             )}
             {handoffFlag && (
@@ -574,9 +714,25 @@ function KlarBlickKompass() {
                 }}
               >
                 Für dieses Thema lohnt sich ein echtes Gespräch mit Kathrin.{" "}
-                <a href="#" style={{ color: COLORS.logoGreen }}>
+                <a href="https://tidycal.com/kathrinlandrock/orientieren" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.logoGreen }}>
                   Klarblick-Gespräch buchen
                 </a>
+              </div>
+            )}
+            {medicalFlag && (
+              <div
+                style={{
+                  background: "#FFF4E5",
+                  border: "1px solid #C18F36",
+                  borderRadius: "10px",
+                  padding: "10px 14px",
+                  fontSize: "13px",
+                  lineHeight: 1.5,
+                  marginTop: "6px",
+                }}
+              >
+                Diese Beschreibung sollte zeitnah augenärztlich oder medizinisch abgeklärt werden.
+                Bei akuten oder starken Beschwerden nutze bitte die örtliche Notfallversorgung.
               </div>
             )}
           </div>
@@ -621,6 +777,31 @@ function KlarBlickKompass() {
               Senden
             </button>
           </div>
+          <div style={{ textAlign: "center", padding: "0 20px 16px" }}>
+            <button onClick={closeSession} disabled={loading} style={{ background: "transparent", border: "none", color: COLORS.subtitle, fontSize: "12px", textDecoration: "underline", cursor: "pointer" }}>
+              Gespräch für heute beenden
+            </button>
+          </div>
+        </div>
+      )}
+
+      {screen === "checkinComplete" && latestAddition && (
+        <div style={{ padding: "28px 24px 34px" }}>
+          <h2 style={{ fontFamily: "'Libre Baskerville', serif", fontSize: "21px", textAlign: "center", margin: "0 0 18px" }}>
+            Neu aufgefallen
+          </h2>
+          <LandkarteSection title={latestAddition.bereich ? `Bereich: ${latestAddition.bereich}` : "Deine Ergänzung"} color={COLORS.weg}>
+            {latestAddition.ergaenzung}
+          </LandkarteSection>
+          {latestAddition.beobachtung && (
+            <LandkarteSection title="Bis zum nächsten Mal" color={COLORS.funktion}>
+              {latestAddition.beobachtung}
+            </LandkarteSection>
+          )}
+          <p style={{ fontStyle: "italic", fontSize: "14px", lineHeight: 1.6 }}>{latestAddition.schlusssatz}</p>
+          <button onClick={() => setScreen("dashboard")} style={{ width: "100%", marginTop: "14px", background: COLORS.logoGreen, color: "#fff", border: "none", borderRadius: "22px", padding: "13px 20px", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}>
+            Zur Übersicht
+          </button>
         </div>
       )}
 
@@ -671,7 +852,7 @@ function KlarBlickKompass() {
             </ul>
           </LandkarteSection>
 
-          <LandkarteSection title="Mein blinder Fleck" color={COLORS.raum}>
+          <LandkarteSection title="Ein möglicher blinder Fleck" color={COLORS.raum}>
             {landkarte.blinderFleck}
           </LandkarteSection>
 
@@ -700,6 +881,31 @@ function KlarBlickKompass() {
             {landkarte.schlusssatz}
           </p>
 
+          <div
+            style={{
+              marginTop: "22px",
+              padding: "14px 16px",
+              background: "#fff",
+              border: `1px solid ${COLORS.text}1A`,
+              borderRadius: "10px",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "'Libre Baskerville', serif",
+                fontSize: "15px",
+                fontWeight: 700,
+                marginBottom: "6px",
+              }}
+            >
+              Deine Landkarte ist gespeichert
+            </div>
+            <div style={{ fontSize: "13px", color: COLORS.subtitle, lineHeight: 1.55 }}>
+              Du kannst jederzeit mit deinem Zugangscode zurückkehren und deine Beobachtungen
+              mit Klara weiterführen. Wenn du eine eigene Kopie möchtest, kannst du sie hier sichern.
+            </div>
+          </div>
+
           <button
             onClick={copyLandkarte}
             style={{
@@ -713,11 +919,17 @@ function KlarBlickKompass() {
               fontWeight: 600,
               cursor: "pointer",
               width: "100%",
-              marginTop: "20px",
+              marginTop: "12px",
             }}
           >
-            {copied ? "Kopiert" : "Landkarte kopieren"}
+            {copied ? "Landkarte kopiert" : "Meine Landkarte kopieren"}
           </button>
+
+          {sessionInfo?.mode === "checkin" && (
+            <button onClick={() => setScreen("dashboard")} style={{ background: "#fff", color: COLORS.logoGreen, border: `1px solid ${COLORS.logoGreen}`, borderRadius: "20px", padding: "11px 20px", fontSize: "14px", width: "100%", marginTop: "10px", cursor: "pointer" }}>
+              Zu meinen weiteren Gesprächen
+            </button>
+          )}
 
           {showTextFallback && (
             <div style={{ marginTop: "12px" }}>
@@ -741,6 +953,65 @@ function KlarBlickKompass() {
               />
             </div>
           )}
+
+          <div style={{ marginTop: "28px", paddingTop: "20px", borderTop: `1px solid ${COLORS.text}1A` }}>
+            <div
+              style={{
+                fontFamily: "'Libre Baskerville', serif",
+                fontSize: "15px",
+                marginBottom: "6px",
+                color: COLORS.text,
+              }}
+            >
+              Wie geht es für dich weiter?
+            </div>
+            <div style={{ fontSize: "13px", color: COLORS.subtitle, marginBottom: "14px" }}>
+              Deine Landkarte zeigt mögliche Spuren. Wenn du jetzt praktisch beginnen möchtest,
+              findest du im KlarBlick-Reset Übungen und Impulse für deinen Alltag. Wenn du persönlich
+              klären möchtest, was für dich wirklich relevant ist, führt dein Weg ins KlarBlick-Gespräch.
+            </div>
+            <a
+              href="https://alfima.com/klangraeume/klarblick-reset"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "block",
+                textAlign: "center",
+                background: "#fff",
+                color: COLORS.logoGreen,
+                border: `1px solid ${COLORS.logoGreen}`,
+                borderRadius: "20px",
+                padding: "12px 20px",
+                fontSize: "14px",
+                fontFamily: "'Raleway', sans-serif",
+                fontWeight: 600,
+                textDecoration: "none",
+                marginBottom: "10px",
+              }}
+            >
+              Mit dem KlarBlick-Reset praktisch beginnen
+            </a>
+            <a
+              href="https://tidycal.com/kathrinlandrock/orientieren"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "block",
+                textAlign: "center",
+                background: COLORS.logoGreen,
+                color: "#fff",
+                border: "none",
+                borderRadius: "20px",
+                padding: "12px 20px",
+                fontSize: "14px",
+                fontFamily: "'Raleway', sans-serif",
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              Meinen nächsten Schritt klären
+            </a>
+          </div>
         </div>
       )}
     </div>
