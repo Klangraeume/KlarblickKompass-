@@ -1,57 +1,41 @@
-# KlarBlick-Kompass als begrenzte Begleitstrecke
+# KlarBlick-Kompass bei GitHub aktualisieren
 
-## Was diese Version kann
+Ersetze im verbundenen GitHub-Repository diese Dateien:
 
-- ein persönlicher Zugangscode pro Käufer
-- 15 Gesprächsblöcke pro Code
-- erste vollständige KlarBlick-Landkarte
-- spätere Beobachtungs-Check-ins mit gespeicherten Ergänzungen
-- serverseitig gespeicherter Verlauf; der Browser kann den Zähler nicht verändern
-- festes KI-Kostenbudget pro Zugangscode
-- medizinische Warnhinweise und Übergang zum persönlichen KlarBlick-Gespräch
+- `index.html`
+- `functions/kompass-chat.js`
+- `netlify.toml`
 
-## Dateien bei GitHub
+In Netlify muss die Umgebungsvariable `ANTHROPIC_API_KEY` gesetzt sein.
 
-Den Inhalt dieses Ordners in das mit Netlify verbundene Repository laden. Nicht nur die ZIP-Datei hochladen.
+Der Kompass kann mehrfach genutzt werden. Jeder neue Durchlauf erstellt eine neue,
+eigenständige Landkarte. Frühere Landkarten und Gespräche werden im Tool nicht gespeichert.
+Wer mit einer Landkarte weiterarbeiten möchte, kopiert sie am Ende und fügt sie später bei
+Klara KlarBlick ein.
 
-## Erforderliche Netlify-Umgebungsvariablen
+Der Einstieg unterscheidet zwischen dem ersten Besuch und einem erneuten Durchlauf. Beim
+ersten Besuch beginnt das Gespräch mit der Frage „Was wünschst du dir für dein Sehen?“.
+Bei einem erneuten Besuch fragt Klara nach Veränderungen seit der letzten Landkarte oder
+danach, was diesmal genauer angeschaut werden soll.
 
-Unter **Project configuration → Environment variables** eintragen:
+Nach dem Commit startet Netlify automatisch einen neuen Deploy. Sobald er veröffentlicht ist, öffne die Seite mit `Strg + F5` und spiele den Kompass vollständig durch.
 
-- `ANTHROPIC_API_KEY`: API-Schlüssel von Anthropic
-- `ACCESS_CODE_SECRET`: mindestens 32 zufällige Zeichen; danach nicht mehr ändern, sonst werden bestehende Codes unlesbar
-- `ADMIN_SECRET`: ein anderes, langes Passwort für die Code-Verwaltung
+## Im Test prüfen
 
-Optional:
+1. Startseite und alle drei Einstiegswege öffnen.
+2. Kontrollieren, dass während einer Antwort „Klara denkt nach ...“ erscheint.
+3. Alle fünf Bereiche bis zur Landkarte durchlaufen.
+4. Die Landkarte kopieren und den kopierten Text prüfen.
+5. Den Link zum KlarBlick-Gespräch am Abschluss testen.
+6. Auf einem Smartphone prüfen, ob Buttons und Texte vollständig sichtbar sind.
 
-- `KLARBLICK_BUDGET_MICRO_USD`: persönliches API-Budget in Micro-US-Dollar. Standard ist `2500000`, also 2,50 USD.
-- `KLARBLICK_MODEL`: Standard ist `claude-sonnet-4-6`.
+## Enthaltener Abschlusslink
 
-Wichtig: `ACCESS_CODE_SECRET` und `ADMIN_SECRET` dürfen niemals in GitHub-Dateien oder Kursunterlagen stehen.
+- KlarBlick-Gespräch: https://tidycal.com/kathrinlandrock/orientieren
 
-## Zugangscode anlegen
+Der Zugang zu Klara KlarBlick wird nicht direkt im öffentlichen Tool verlinkt. Link und
+Anleitung werden ausschließlich im Alfima-Kurs bereitgestellt.
 
-Nach dem Deploy diese Seite öffnen:
-
-`https://DEINE-DOMAIN/code-verwaltung.html`
-
-Verwaltungsschlüssel eingeben, optional einen Namen zur internen Zuordnung ergänzen und den Code erstellen. Der Code wird nur einmal vollständig angezeigt. In Netlify wird ausschließlich ein nicht zurückrechenbarer Prüfwert gespeichert.
-
-## Wie gezählt wird
-
-Ein Klick auf **Gespräch beginnen** reserviert einen der 15 Gesprächsblöcke. Einzelne Nachrichten werden nicht als eigene Sitzung gezählt. Wird ein Gespräch bewusst abgebrochen, gilt der Block als genutzt. Das verhindert endlose offene Sitzungen und hält die Kalkulation nachvollziehbar.
-
-## Kostenschutz
-
-Vor jedem Anthropic-Aufruf reserviert der Server konservativ die voraussichtlichen Kosten. Nach der Antwort ersetzt er die Reservierung durch die tatsächlich von Anthropic gemeldeten Input- und Outputtokens. Ist das persönliche Budget erreicht, startet kein weiterer API-Aufruf.
-
-Zusätzlich in der Anthropic Console ein monatliches Workspace-Spend-Limit setzen. Das ist die zweite, kontoweite Sicherung für den Fall von Fehlkonfiguration oder ungewöhnlichem Traffic.
-
-## Test vor dem Verkauf
-
-1. Einen Testcode anlegen.
-2. Erste Landkarte vollständig durchspielen.
-3. Browser schließen und mit demselben Code zurückkehren.
-4. Mindestens zwei Check-ins testen.
-5. Unter Netlify **Usage & billing** sowie in der Anthropic Console die tatsächlichen Kosten prüfen.
-6. Erst danach das persönliche Budget oder den Modellnamen verändern.
+Für den Verkauf dieses Modells werden weder Make noch Zugangscodes, eine Admin-Seite oder
+Netlify Blobs benötigt. Die Zugangskontrolle übernimmt Alfima, weil nur Käufer den Link zum
+Kompass und zu Klara im Kurs sehen.

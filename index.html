@@ -59,9 +59,16 @@ const AREAS = [
 ];
 
 const PATHS = [
-  { key: "brille", label: "Ohne meine Brille bin ich stark eingeschränkt", desc: "Für starke oder langjährige Fehlsichtigkeit" },
-  { key: "veraenderung", label: "Mein Sehen verändert sich gerade", desc: "Für aktuelle Veränderungen, neue Werte, Lesebrille" },
-  { key: "belastung", label: "Meine Augen funktionieren, sind aber ständig belastet", desc: "Für Anstrengung, Trockenheit, Bildschirmbelastung" },
+  {
+    key: "erstmals",
+    label: "Ich bin zum ersten Mal hier",
+    desc: "Ich möchte meine erste persönliche KlarBlick-Landkarte erstellen",
+  },
+  {
+    key: "erneut",
+    label: "Ich war schon einmal hier",
+    desc: "Ich möchte neu hinschauen und eine weitere Landkarte erstellen",
+  },
 ];
 
 function polarToXY(cx, cy, r, angleDeg) {
@@ -73,7 +80,6 @@ function parseAssistantMessage(raw) {
   let text = raw;
   let areaDone = null;
   let landkarte = null;
-  let checkin = null;
   let handoff = false;
   let medical = false;
 
@@ -100,24 +106,11 @@ function parseAssistantMessage(raw) {
       landkarte = null;
     }
   }
-  const checkinIdx = text.indexOf("[[CHECKIN_DONE]]");
-  if (checkinIdx !== -1) {
-    const jsonPart = text.slice(checkinIdx + "[[CHECKIN_DONE]]".length).trim();
-    text = text.slice(0, checkinIdx).trim();
-    try {
-      checkin = JSON.parse(jsonPart);
-    } catch (e) {
-      checkin = null;
-    }
-  }
-  return { text, areaDone, landkarte, checkin, handoff, medical };
+  return { text, areaDone, landkarte, handoff, medical };
 }
 
 function KlarBlickKompass() {
   const [screen, setScreen] = useState("cover");
-  const [accessCode, setAccessCode] = useState("");
-  const [accessError, setAccessError] = useState("");
-  const [sessionInfo, setSessionInfo] = useState(null);
   const [selectedPath, setSelectedPath] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -129,7 +122,6 @@ function KlarBlickKompass() {
   const [medicalFlag, setMedicalFlag] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showTextFallback, setShowTextFallback] = useState(false);
-  const [latestAddition, setLatestAddition] = useState(null);
   const scrollRef = useRef(null);
 
   function landkarteAsText(lk) {
@@ -215,81 +207,25 @@ function KlarBlickKompass() {
 
   const ORDER = ["ursprung", "koerper", "funktion", "raum", "umfeld"];
 
-  function applyServerState(data) {
-    setSessionInfo({
-      sessionsUsed: data.sessionsUsed,
-      sessionsRemaining: data.sessionsRemaining,
-      activeSession: data.activeSession,
-      mode: data.mode,
-      exhausted: data.exhausted,
-      additions: data.additions || [],
-    });
-    if (data.landkarte) setLandkarte(data.landkarte);
-  }
-
-  async function accessApi(action, extra = {}) {
-    const response = await fetch("/.netlify/functions/kompass-chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, code: accessCode, ...extra }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      const error = new Error(data.error || "Die Anfrage konnte gerade nicht verarbeitet werden.");
-      error.data = data;
-      throw error;
-    }
-    applyServerState(data);
-    return data;
-  }
-
-  function hydrateConversation(data) {
-    const clean = [];
-    const done = {};
-    (data.activeMessages || []).forEach((message) => {
-      if (message.role === "assistant") {
-        const parsed = parseAssistantMessage(message.content);
-        if (parsed.areaDone) done[parsed.areaDone] = true;
-        clean.push({ role: "assistant", content: parsed.text });
-      } else {
-        clean.push(message);
-      }
-    });
-    setVisited(done);
-    setMessages(clean);
-  }
-
-  async function checkAccess() {
-    if (!accessCode.trim() || loading) return;
-    setLoading(true);
-    setAccessError("");
-    try {
-      const data = await accessApi("status");
-      if (data.activeSession) {
-        hydrateConversation(data);
-        setScreen("chat");
-      } else if (data.mode === "checkin") {
-        setScreen("dashboard");
-      } else {
-        setScreen("intro");
-      }
-    } catch (error) {
-      setAccessError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function callClaude(message) {
+  async function callClaude(history, doneSoFar) {
     setLoading(true);
     try {
-      const data = await accessApi("message", { message });
-      if (!Array.isArray(data.content)) throw new Error("Die Antwort konnte gerade nicht geladen werden.");
+      const response = await fetch("/.netlify/functions/kompass-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: history.map((m) => ({ role: m.role, content: m.content })),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !Array.isArray(data.content)) {
+        throw new Error(data.error || "Die Antwort konnte gerade nicht geladen werden.");
+      }
       const rawText = data.content
         .filter((b) => b.type === "text")
         .map((b) => b.text)
         .join("\n");
-      const { text, areaDone, landkarte: lk, checkin, handoff, medical } = parseAssistantMessage(rawText);
+      const { text, areaDone, landkarte: lk, handoff, medical } = parseAssistantMessage(rawText);
       if (areaDone) {
         const updatedVisited = { ...(doneSoFar || visited), [areaDone]: true };
         setVisited(updatedVisited);
@@ -302,10 +238,6 @@ function KlarBlickKompass() {
         setLandkarte(lk);
         setScreen("landkarte");
       }
-      if (checkin) {
-        setLatestAddition(checkin);
-        setScreen("checkinComplete");
-      }
       setMessages((prev) => [...prev, { role: "assistant", content: text }]);
     } catch (e) {
       setMessages((prev) => [
@@ -317,62 +249,28 @@ function KlarBlickKompass() {
     }
   }
 
-  async function startPath(path) {
+  function startPath(path) {
     setSelectedPath(path);
     setScreen("chat");
-    setMessages([]);
-    setLoading(true);
-    try {
-      const data = await accessApi("start", { path: path.label });
-      const rawText = data.content.filter((b) => b.type === "text").map((b) => b.text).join("\n");
-      const parsed = parseAssistantMessage(rawText);
-      setMessages([{ role: "assistant", content: parsed.text }]);
-    } catch (error) {
-      setMessages([{ role: "assistant", content: error.message }]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function startCheckin() {
-    setScreen("chat");
-    setMessages([]);
-    setVisited({});
-    setCurrentArea("weg");
-    setLoading(true);
-    try {
-      const data = await accessApi("start");
-      const rawText = data.content.filter((b) => b.type === "text").map((b) => b.text).join("\n");
-      const parsed = parseAssistantMessage(rawText);
-      setMessages([{ role: "assistant", content: parsed.text }]);
-    } catch (error) {
-      setMessages([{ role: "assistant", content: error.message }]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function closeSession() {
-    if (loading || !window.confirm("Möchtest du dieses Gespräch wirklich beenden? Dieser Gesprächsblock gilt dann als genutzt.")) return;
-    setLoading(true);
-    try {
-      await accessApi("close");
-      setMessages([]);
-      setScreen(sessionInfo?.mode === "checkin" ? "dashboard" : "intro");
-    } catch (error) {
-      setMessages((prev) => [...prev, { role: "assistant", content: error.message }]);
-    } finally {
-      setLoading(false);
-    }
+    const openingQuestion =
+      path.key === "erstmals"
+        ? "Was wünschst du dir für dein Sehen?"
+        : "Was hat sich seit deiner letzten Landkarte verändert oder was möchtest du diesmal genauer anschauen?";
+    const starterUser = {
+      role: "user",
+      content: `Ich starte den KlarBlick-Kompass. Mein Einstieg: "${path.label}". Begrüße mich kurz und erkläre die Grenzen des Tools in höchstens zwei kurzen Sätzen. Stelle mir danach genau diese offene Frage: "${openingQuestion}"`,
+    };
+    const next = [starterUser];
+    setMessages(next);
+    callClaude(next);
   }
 
   function sendMessage() {
     if (!input.trim() || loading) return;
-    const userText = input.trim();
-    const next = [...messages, { role: "user", content: userText }];
+    const next = [...messages, { role: "user", content: input.trim() }];
     setMessages(next);
     setInput("");
-    callClaude(userText);
+    callClaude(next);
   }
 
   function jumpToArea(areaKey) {
@@ -384,7 +282,7 @@ function KlarBlickKompass() {
       { role: "user", content: `Lass uns jetzt in den Bereich "${label}" wechseln.` },
     ];
     setMessages(next);
-    callClaude(`Lass uns jetzt in den Bereich "${label}" wechseln.`);
+    callClaude(next);
   }
 
   const visitedCount = Object.keys(visited).length;
@@ -433,9 +331,9 @@ function KlarBlickKompass() {
               </div>
             </div>
           </div>
-          {sessionInfo && screen !== "access" && (
+          {screen === "chat" && (
             <div style={{ fontSize: "12px", color: COLORS.subtitle }}>
-              {sessionInfo.sessionsRemaining} von 15 Gesprächen übrig
+              {visitedCount} / 5 Bereiche
             </div>
           )}
         </div>
@@ -463,7 +361,7 @@ function KlarBlickKompass() {
               Dein persönliches Orientierungsgespräch über die Geschichte deines Sehens
             </p>
             <button
-              onClick={() => setScreen("access")}
+              onClick={() => setScreen("intro")}
               style={{
                 background: COLORS.logoGreen,
                 color: "#fff",
@@ -479,69 +377,6 @@ function KlarBlickKompass() {
               Weiter
             </button>
           </div>
-        </div>
-      )}
-
-      {screen === "access" && (
-        <div style={{ padding: "34px 24px 38px", textAlign: "center" }}>
-          <h1 style={{ fontFamily: "'Libre Baskerville', serif", fontSize: "23px", margin: "0 0 8px" }}>
-            Dein persönlicher Zugang
-          </h1>
-          <p style={{ fontSize: "14px", color: COLORS.subtitle, lineHeight: 1.55, margin: "0 0 22px" }}>
-            Gib den Zugangscode aus deinem Kursbereich ein. Dein Stand wird sicher gespeichert,
-            damit du später zu Klara zurückkehren kannst.
-          </p>
-          <input
-            value={accessCode}
-            onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-            onKeyDown={(e) => e.key === "Enter" && checkAccess()}
-            placeholder="XXXX-XXXX-XXXX"
-            autoComplete="off"
-            style={{ width: "100%", border: `1px solid ${COLORS.text}44`, borderRadius: "10px", padding: "13px 15px", fontSize: "16px", textAlign: "center", letterSpacing: "1.5px", fontFamily: "'Raleway', sans-serif" }}
-          />
-          {accessError && <div style={{ color: COLORS.logoRed, fontSize: "13px", marginTop: "10px" }}>{accessError}</div>}
-          <button
-            onClick={checkAccess}
-            disabled={loading}
-            style={{ width: "100%", marginTop: "14px", background: COLORS.logoGreen, color: "#fff", border: "none", borderRadius: "22px", padding: "13px 20px", fontSize: "15px", fontWeight: 600, cursor: loading ? "default" : "pointer", opacity: loading ? 0.65 : 1 }}
-          >
-            {loading ? "Zugang wird geprüft..." : "Kompass öffnen"}
-          </button>
-        </div>
-      )}
-
-      {screen === "dashboard" && sessionInfo && (
-        <div style={{ padding: "28px 24px 34px" }}>
-          <h1 style={{ fontFamily: "'Libre Baskerville', serif", fontSize: "22px", textAlign: "center", margin: "0 0 8px" }}>
-            Willkommen zurück
-          </h1>
-          <p style={{ fontSize: "14px", color: COLORS.subtitle, textAlign: "center", lineHeight: 1.55, margin: "0 0 22px" }}>
-            Deine erste Landkarte ist gespeichert. In einem neuen Gespräch kannst du Klara erzählen,
-            was dir seitdem aufgefallen ist.
-          </p>
-          <div style={{ background: "#fff", borderRadius: "12px", padding: "16px", marginBottom: "16px", border: `1px solid ${COLORS.text}1A` }}>
-            <div style={{ fontFamily: "'Libre Baskerville', serif", fontSize: "16px", marginBottom: "5px" }}>
-              Deine Begleitstrecke
-            </div>
-            <div style={{ fontSize: "13px", color: COLORS.subtitle }}>
-              {sessionInfo.sessionsUsed} Gesprächsblöcke genutzt · {sessionInfo.sessionsRemaining} übrig
-            </div>
-            <div style={{ height: "7px", background: `${COLORS.text}16`, borderRadius: "8px", marginTop: "12px", overflow: "hidden" }}>
-              <div style={{ width: `${(sessionInfo.sessionsUsed / 15) * 100}%`, height: "100%", background: COLORS.logoGreen }} />
-            </div>
-          </div>
-          <button
-            onClick={startCheckin}
-            disabled={loading || sessionInfo.exhausted}
-            style={{ width: "100%", background: COLORS.logoGreen, color: "#fff", border: "none", borderRadius: "22px", padding: "13px 20px", fontSize: "15px", fontWeight: 600, cursor: "pointer", opacity: sessionInfo.exhausted ? 0.55 : 1 }}
-          >
-            {sessionInfo.exhausted ? "Begleitstrecke abgeschlossen" : "Neuen Check-in beginnen"}
-          </button>
-          {landkarte && (
-            <button onClick={() => setScreen("landkarte")} style={{ width: "100%", marginTop: "10px", background: "#fff", color: COLORS.logoGreen, border: `1px solid ${COLORS.logoGreen}`, borderRadius: "22px", padding: "12px 20px", fontSize: "14px", cursor: "pointer" }}>
-              Meine Landkarte ansehen
-            </button>
-          )}
         </div>
       )}
 
@@ -567,7 +402,7 @@ function KlarBlickKompass() {
             KlarBlick-Landkarte.
           </p>
           <p style={{ fontSize: "13px", color: COLORS.subtitle, margin: "0 0 22px" }}>
-            Plane für deine erste KlarBlick-Landkarte etwa 20 Minuten ein. Wenn du dir Zeit zum Nachspüren nimmst, können es auch 30 Minuten werden. Es geht nicht darum, schnell durchzukommen, deine Antworten sind das Material, aus dem deine Landkarte entsteht.
+            Plane für deinen KlarBlick-Durchlauf etwa 20 Minuten ein. Wenn du dir Zeit zum Nachspüren nimmst, können es auch 30 Minuten werden. Es geht nicht darum, schnell durchzukommen, deine Antworten sind das Material, aus dem deine Landkarte entsteht.
           </p>
 
           <h2
@@ -577,10 +412,10 @@ function KlarBlickKompass() {
               margin: "0 0 12px",
             }}
           >
-            Was beschäftigt dich gerade am meisten?
+            Wie möchtest du heute starten?
           </h2>
           {PATHS.map((p, i) => {
-            const accent = [COLORS.ursprung, COLORS.raum, COLORS.umfeld][i];
+            const accent = [COLORS.ursprung, COLORS.raum][i];
             return (
               <button
                 key={p.key}
@@ -640,7 +475,7 @@ function KlarBlickKompass() {
             >
               {AREAS.find((a) => a.key === currentArea)?.label}
             </div>
-            {sessionInfo?.mode === "first" && <div style={{ display: "flex", gap: "6px" }}>
+            <div style={{ display: "flex", gap: "6px" }}>
               {ORDER.map((key) => (
                 <div
                   key={key}
@@ -658,7 +493,7 @@ function KlarBlickKompass() {
                   }}
                 />
               ))}
-            </div>}
+            </div>
           </div>
 
           <div
@@ -777,31 +612,6 @@ function KlarBlickKompass() {
               Senden
             </button>
           </div>
-          <div style={{ textAlign: "center", padding: "0 20px 16px" }}>
-            <button onClick={closeSession} disabled={loading} style={{ background: "transparent", border: "none", color: COLORS.subtitle, fontSize: "12px", textDecoration: "underline", cursor: "pointer" }}>
-              Gespräch für heute beenden
-            </button>
-          </div>
-        </div>
-      )}
-
-      {screen === "checkinComplete" && latestAddition && (
-        <div style={{ padding: "28px 24px 34px" }}>
-          <h2 style={{ fontFamily: "'Libre Baskerville', serif", fontSize: "21px", textAlign: "center", margin: "0 0 18px" }}>
-            Neu aufgefallen
-          </h2>
-          <LandkarteSection title={latestAddition.bereich ? `Bereich: ${latestAddition.bereich}` : "Deine Ergänzung"} color={COLORS.weg}>
-            {latestAddition.ergaenzung}
-          </LandkarteSection>
-          {latestAddition.beobachtung && (
-            <LandkarteSection title="Bis zum nächsten Mal" color={COLORS.funktion}>
-              {latestAddition.beobachtung}
-            </LandkarteSection>
-          )}
-          <p style={{ fontStyle: "italic", fontSize: "14px", lineHeight: 1.6 }}>{latestAddition.schlusssatz}</p>
-          <button onClick={() => setScreen("dashboard")} style={{ width: "100%", marginTop: "14px", background: COLORS.logoGreen, color: "#fff", border: "none", borderRadius: "22px", padding: "13px 20px", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}>
-            Zur Übersicht
-          </button>
         </div>
       )}
 
@@ -898,11 +708,11 @@ function KlarBlickKompass() {
                 marginBottom: "6px",
               }}
             >
-              Deine Landkarte ist gespeichert
+              Sichere dir jetzt deine Landkarte
             </div>
             <div style={{ fontSize: "13px", color: COLORS.subtitle, lineHeight: 1.55 }}>
-              Du kannst jederzeit mit deinem Zugangscode zurückkehren und deine Beobachtungen
-              mit Klara weiterführen. Wenn du eine eigene Kopie möchtest, kannst du sie hier sichern.
+              Kopiere dir deine Landkarte, wenn du später mit deiner persönlichen
+              KlarBlick-Begleiterin Klara weiterarbeiten möchtest.
             </div>
           </div>
 
@@ -924,12 +734,6 @@ function KlarBlickKompass() {
           >
             {copied ? "Landkarte kopiert" : "Meine Landkarte kopieren"}
           </button>
-
-          {sessionInfo?.mode === "checkin" && (
-            <button onClick={() => setScreen("dashboard")} style={{ background: "#fff", color: COLORS.logoGreen, border: `1px solid ${COLORS.logoGreen}`, borderRadius: "20px", padding: "11px 20px", fontSize: "14px", width: "100%", marginTop: "10px", cursor: "pointer" }}>
-              Zu meinen weiteren Gesprächen
-            </button>
-          )}
 
           {showTextFallback && (
             <div style={{ marginTop: "12px" }}>
@@ -963,34 +767,12 @@ function KlarBlickKompass() {
                 color: COLORS.text,
               }}
             >
-              Wie geht es für dich weiter?
+              Du möchtest deinen nächsten Schritt persönlich klären?
             </div>
             <div style={{ fontSize: "13px", color: COLORS.subtitle, marginBottom: "14px" }}>
-              Deine Landkarte zeigt mögliche Spuren. Wenn du jetzt praktisch beginnen möchtest,
-              findest du im KlarBlick-Reset Übungen und Impulse für deinen Alltag. Wenn du persönlich
-              klären möchtest, was für dich wirklich relevant ist, führt dein Weg ins KlarBlick-Gespräch.
+              Wenn du merkst, dass deine Landkarte Fragen aufwirft, die du nicht allein weiterklären
+              möchtest, kannst du ein persönliches KlarBlick-Gespräch mit mir buchen.
             </div>
-            <a
-              href="https://alfima.com/klangraeume/klarblick-reset"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "block",
-                textAlign: "center",
-                background: "#fff",
-                color: COLORS.logoGreen,
-                border: `1px solid ${COLORS.logoGreen}`,
-                borderRadius: "20px",
-                padding: "12px 20px",
-                fontSize: "14px",
-                fontFamily: "'Raleway', sans-serif",
-                fontWeight: 600,
-                textDecoration: "none",
-                marginBottom: "10px",
-              }}
-            >
-              Mit dem KlarBlick-Reset praktisch beginnen
-            </a>
             <a
               href="https://tidycal.com/kathrinlandrock/orientieren"
               target="_blank"
