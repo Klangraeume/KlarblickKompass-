@@ -25,9 +25,10 @@ Nach dem Commit startet Netlify automatisch einen neuen Deploy. Sobald er veröf
 1. Startseite und alle drei Einstiegswege öffnen.
 2. Kontrollieren, dass während einer Antwort „Klara denkt nach ...“ erscheint.
 3. Alle fünf Bereiche bis zur Landkarte durchlaufen.
-4. Die Landkarte kopieren und den kopierten Text prüfen.
-5. Den Link zum KlarBlick-Gespräch am Abschluss testen.
-6. Auf einem Smartphone prüfen, ob Buttons und Texte vollständig sichtbar sind.
+4. Prüfen, dass während des Gesprächs kein Buchungshinweis und kein Buchungsbanner erscheint, auch nicht bei familiärer oder emotionaler Belastung.
+5. Die Landkarte kopieren und den kopierten Text prüfen.
+6. Den Link zum KlarBlick-Gespräch ausschließlich am Abschluss testen.
+7. Auf einem Smartphone prüfen, ob Buttons und Texte vollständig sichtbar sind.
 
 ## Enthaltener Abschlusslink
 
