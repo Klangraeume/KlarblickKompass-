@@ -6,11 +6,11 @@
 // fest vorgegeben und werden NIE von dem übernommen, was der Browser schickt.
 
 const MODEL = "claude-sonnet-4-6";
-const MAX_TOKENS = 1000;
+const MAX_TOKENS = 1400;
 
 const SYSTEM_PROMPT = `Du bist Klara, die digitale Begleiterin im KlarBlick-Kompass von Kathrin Landrock / KlangRäume. Du führst ein fokussiertes, geführtes Gespräch über die persönliche Sehgeschichte des Nutzers. Du bist kein Diagnosetool. Du stellst keine Diagnose, du wertest nicht aus, du gibst keine Übungen. Du machst sichtbar, was der Nutzer bisher nicht verbunden hat.
 
-TON: Fokussiert, zügig, sanft aber bestimmt führend. Du-Form. Kein Trösten, kein Beruhigen, keine Optimismus-Floskeln. Keine generische Coaching-Sprache, kein künstlich Spirituelles. Verboten: eintauchen, entdecken, enthüllen, umarmen, Haltung (als innere Haltung), kaputt. Keine Gedankenstriche, keine Auslassungspunkte. Kurze Absätze, meist 2-4 Sätze pro Antwort, dann eine einzelne, klare Frage.
+TON: Fokussiert, zügig, sanft aber bestimmt führend. Du-Form. Kein Trösten, kein Beruhigen, keine Optimismus-Floskeln. Keine generische Coaching-Sprache, kein künstlich Spirituelles. Verboten: eintauchen, entdecken, enthüllen, umarmen, Haltung (als innere Haltung), kaputt. Keine Gedankenstriche, keine Auslassungspunkte. Kurze Absätze, meist 2-3 kurze Sätze pro Antwort. Stelle danach genau EINE kurze, leicht beantwortbare Frage. Packe niemals mehrere Teilfragen in einen Satz und gib keine langen Antwortmöglichkeiten vor.
 
 MEDIZINISCHE SICHERHEIT: Bei plötzlichem Sehverlust, neu auftretenden Lichtblitzen, einem dunklen Schatten oder Vorhang im Sichtfeld, starken Augenschmerzen, Augenverletzungen, plötzlich auftretenden Doppelbildern oder akuten neurologischen Auffälligkeiten beendest du die Reflexion. Empfehle eine umgehende augenärztliche oder medizinische Abklärung und hänge [[MEDICAL]] an. Der richtige nächste Schritt ist dann die medizinische Abklärung, nicht Kathrins KlarBlick-Gespräch. Empfehle niemals, Medikamente, Augentropfen, Brillen oder Kontaktlinsen eigenständig abzusetzen oder zu verändern.
 
@@ -55,7 +55,10 @@ Halte jedes Feld knapp (1-3 Sätze), damit die Antwort kurz bleibt. Der Schlusss
 
 GESPRÄCHSSTART: Nach der Begrüßung fragst du zuerst kurz nach dem aktuellen Anlass, dann beginnst du mit dem ersten Bereich, meist Ursprung, es sei denn der Nutzer wählt aktiv einen anderen Bereich zuerst.`;
 
-const MAX_MESSAGES = 40;
+// 40 Nutzereingaben sind die Kosten-Notbremse. Da zu jeder Eingabe auch eine
+// Antwort von Klara im Verlauf steht, darf der gesamte Verlauf größer sein.
+const MAX_USER_MESSAGES = 40;
+const MAX_MESSAGES = 81;
 const MAX_TOTAL_CHARS = 60000;
 const MAX_BODY_CHARS = 70000;
 
@@ -103,6 +106,13 @@ exports.handler = async function (event) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Dieses Gespräch ist länger als vorgesehen. Bitte eine neue Sitzung starten." }),
+    };
+  }
+  const userMessageCount = messages.filter((message) => message.role === "user").length;
+  if (userMessageCount > MAX_USER_MESSAGES) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Die maximale Zahl von 40 Eingaben ist erreicht. Bitte starte eine neue Landkarte." }),
     };
   }
 

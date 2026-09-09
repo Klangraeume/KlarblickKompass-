@@ -30,6 +30,10 @@ Nach dem Commit startet Netlify automatisch einen neuen Deploy. Sobald er veröf
 6. Den Link zum KlarBlick-Gespräch ausschließlich am Abschluss testen.
 7. Auf einem Smartphone prüfen, ob Buttons und Texte vollständig sichtbar sind.
 
+Die Kosten-Notbremse greift nach 40 Eingaben des Nutzers. Antworten von Klara werden dabei
+nicht mitgezählt. Ein vollständiger Durchlauf kann deshalb auch bei mehreren Rückfragen bis
+zur Landkarte abgeschlossen werden.
+
 ## Enthaltener Abschlusslink
 
 - KlarBlick-Gespräch: https://tidycal.com/kathrinlandrock/orientieren

@@ -86,14 +86,19 @@ function parseAssistantMessage(raw) {
     medical = true;
     text = text.replace("[[MEDICAL]]", "").trim();
   }
-  const areaMatch = text.match(/\[\[AREA_DONE:(\w+)\]\]/);
+  const areaPattern = /\[\[\s*AREA_DONE\s*:\s*(ursprung|koerper|funktion|raum|umfeld)\s*\]\]/gi;
+  const areaMatch = areaPattern.exec(text);
   if (areaMatch) {
-    areaDone = areaMatch[1];
-    text = text.replace(areaMatch[0], "").trim();
+    areaDone = areaMatch[1].toLowerCase();
+    text = text.replace(areaPattern, "").trim();
   }
   const landkarteIdx = text.indexOf("[[LANDKARTE]]");
   if (landkarteIdx !== -1) {
-    const jsonPart = text.slice(landkarteIdx + "[[LANDKARTE]]".length).trim();
+    const jsonPart = text
+      .slice(landkarteIdx + "[[LANDKARTE]]".length)
+      .trim()
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/, "");
     text = text.slice(0, landkarteIdx).trim();
     try {
       landkarte = JSON.parse(jsonPart);
@@ -213,7 +218,11 @@ function KlarBlickKompass() {
       });
       const data = await response.json();
       if (!response.ok || !Array.isArray(data.content)) {
-        throw new Error(data.error || "Die Antwort konnte gerade nicht geladen werden.");
+        const serverMessage = typeof data.error === "string" ? data.error : data.error?.message;
+        const publicMessage = response.status === 429
+          ? "Klara ist gerade ausgelastet. Bitte warte einen Moment und versuche es dann erneut."
+          : serverMessage || "Die Antwort konnte gerade nicht geladen werden.";
+        throw new Error(publicMessage);
       }
       const rawText = data.content
         .filter((b) => b.type === "text")
@@ -235,7 +244,7 @@ function KlarBlickKompass() {
     } catch (e) {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Da ist gerade etwas schiefgelaufen. Magst du deine letzte Nachricht noch einmal schicken?" },
+        { role: "assistant", content: e.message || "Da ist gerade etwas schiefgelaufen. Bitte versuche es noch einmal." },
       ]);
     } finally {
       setLoading(false);
